@@ -3,7 +3,7 @@ export const LOGO_URL = '/kalam-logo-transparent.png';
 export const BRAND = {
   name: 'KALAM',
   festival: 'College Arts Fest 2K26',
-  organizer: 'ASAAS Students Union',
+  organizer: 'ASAS Students Union',
   college: "Shihab Thangal Women’s College",
   location: 'Chundampatta, Palakkad',
   tagline: 'കലം കവിയും കല പെയ്യും',
