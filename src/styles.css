@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Baloo+Chettan+2:wght@500;600;700;800&family=Noto+Sans+Malayalam:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --clay-900:#2A1208; --clay-800:#54240C; --clay-700:#843C0C; --clay-500:#B4540C;
+  --glaze-500:#E49C0C; --glaze-300:#F3C25B;
+  --pink-500:#FC246C; --pink-600:#E0145F; --pink-700:#D3125A;
+  --sky-500:#24B4FC; --sky-700:#0A6FA8; --lime-500:#B4FC24; --lime-700:#4E7A00;
+  --violet-500:#9C24FC; --violet-600:#7A1FD6; --tangerine-500:#FC9C3C;
+  --paper:#FBF8F6; --card:#fff; --line:#EBDFD7; --ink:#2B1409; --muted:#6B5446;
+  --on-kiln:#F6EBE3; --on-kiln-muted:#C9B3A5; --silver:#C9C2BD;
+  --font-display:'Poppins','Baloo Chettan 2',system-ui,sans-serif;
+  --font-text:'Inter','Noto Sans Malayalam',system-ui,sans-serif;
+  --ease:cubic-bezier(.2,.7,.2,1);
+  /* Compatibility for the original application's admin and utility components. */
+  --color-navy:var(--clay-800); --color-navy-deep:var(--clay-900);
+  --color-burgundy:var(--pink-600); --color-burgundy-dark:var(--pink-700);
+  --color-gold:var(--glaze-500); --color-emerald:var(--lime-700);
+  --color-indigo:var(--sky-700); --color-live:var(--pink-600);
+  --color-page:var(--paper); --color-ink:var(--ink); --color-muted:var(--muted); --color-line:var(--line);
+  --radius-card:18px; --radius-panel:22px;
+  --shadow-soft:0 8px 24px rgba(84,36,12,.06);
+  --shadow-raised:0 18px 48px rgba(42,18,8,.15);
+}
+html { scroll-behavior:smooth; }
+body { margin:0; min-width:320px; background:var(--paper); color:var(--ink); font-family:var(--font-text); line-height:1.6; }
+[lang='ml'],:lang(ml) { line-height:1.65; letter-spacing:0 !important; }
+h1,h2,h3,h4,button { font-family:var(--font-display); }
+h1,h2,h3,h4 { color:var(--clay-800); }
+::selection { background:var(--pink-500); color:var(--clay-900); }
+.text-muted { color:var(--muted); }
+:where(a,button,input,select,textarea,summary):focus-visible { outline:3px solid var(--pink-700) !important; outline-offset:3px; }
+.kiln :where(a,button,summary):focus-visible,footer :where(a,button,summary):focus-visible,.bg-navy-deep :where(a,button):focus-visible { outline-color:#fff !important; }
+main { overflow-wrap:anywhere; }
+footer .text-white\/50,footer .text-white\/60,footer .text-white\/70 { color:var(--on-kiln-muted); }
+footer .text-white\/80 { color:var(--on-kiln); }
+.tabular-nums, time, [data-score] { font-variant-numeric:tabular-nums; }
+@keyframes paint-rise { from { transform:translateY(70px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@keyframes live-pulse { 50% { opacity:.35; transform:scale(.8); } }
+.paint-layer { animation:paint-rise .9s var(--ease) both; }
+.paint-layer:nth-child(2) { animation-delay:90ms; }.paint-layer:nth-child(3) { animation-delay:180ms; }.paint-layer:nth-child(4) { animation-delay:270ms; }.paint-layer:nth-child(5) { animation-delay:360ms; }
+.live-dot { animation:live-pulse 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation:none !important; transition:none !important; transform:none !important; } }
+
+.text-burgundy { color:var(--pink-700); }
