@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import LoadingInline from '../LoadingInline';
 import { supabase } from '../../lib/supabaseClient';
 import { readAllAdminRows } from '../../lib/adminRows';
+import { fetchResultsData } from '../../lib/publicRecords';
 import { eventScoringKey } from '../../lib/scoringKey';
 import { evaluateDraftSelection } from '../../lib/resultsPublication';
 import { formatAdminTimestamp, loadLastEdits } from '../../lib/adminMetadata';
@@ -41,6 +42,7 @@ export default function ResultsManager({ lookups, onChange }) {
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [error, setError] = useState('');
   const [readError, setReadError] = useState('');
   const [notice, setNotice] = useState('');
@@ -408,6 +410,44 @@ export default function ResultsManager({ lookups, onChange }) {
     }
   }
 
+  async function downloadPublishedPdf() {
+    if (busy || exportingPdf) return;
+
+    setError('');
+    setNotice('');
+    setExportingPdf(true);
+
+    try {
+      // Fetch again for every download; do not export the possibly stale admin list.
+      const results = await fetchResultsData();
+
+      if (!results.length) {
+        setNotice('There are no public published results to download.');
+        return;
+      }
+
+      const { downloadPublishedResultsPdf } = await import(
+        '../../lib/publishedResultsPdf'
+      );
+
+      await downloadPublishedResultsPdf(results);
+
+      setNotice(
+        `PDF prepared with ${results.length} published result${
+          results.length === 1 ? '' : 's'
+        }.`
+      );
+    } catch (cause) {
+      setError(
+        `Could not download the PDF: ${
+          cause?.message || 'please check your connection and try again.'
+        }`
+      );
+    } finally {
+      setExportingPdf(false);
+    }
+  }
+
   async function remove(row) {
     if (
       !window.confirm(
@@ -722,14 +762,27 @@ export default function ResultsManager({ lookups, onChange }) {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-base font-bold text-navy">Result records</h3>
 
-          <button
-            type="button"
-            onClick={load}
-            disabled={busy}
-            className="text-xs font-bold text-burgundy hover:underline disabled:opacity-50"
-          >
-            Refresh
-          </button>
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={downloadPublishedPdf}
+              disabled={busy || exportingPdf}
+              className="rounded-full border border-burgundy px-4 py-2 text-xs font-bold text-burgundy hover:bg-page disabled:opacity-50"
+            >
+              {exportingPdf
+                ? 'Preparing PDF…'
+                : 'Download published results as PDF'}
+            </button>
+
+            <button
+              type="button"
+              onClick={load}
+              disabled={busy || exportingPdf}
+              className="text-xs font-bold text-burgundy hover:underline disabled:opacity-50"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
 
         <div
