@@ -762,14 +762,27 @@ export default function ResultsManager({ lookups, onChange }) {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h3 className="text-base font-bold text-navy">Result records</h3>
 
-          <button
-            type="button"
-            onClick={load}
-            disabled={busy}
-            className="text-xs font-bold text-burgundy hover:underline disabled:opacity-50"
-          >
-            Refresh
-          </button>
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              onClick={downloadPublishedPdf}
+              disabled={busy || exportingPdf}
+              className="rounded-full border border-burgundy px-4 py-2 text-xs font-bold text-burgundy hover:bg-page disabled:opacity-50"
+            >
+              {exportingPdf
+                ? 'Preparing PDF…'
+                : 'Download published results as PDF'}
+            </button>
+
+            <button
+              type="button"
+              onClick={load}
+              disabled={busy || exportingPdf}
+              className="text-xs font-bold text-burgundy hover:underline disabled:opacity-50"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
 
         <div
@@ -918,27 +931,14 @@ export default function ResultsManager({ lookups, onChange }) {
                       Edit
                     </button>
 
-                        <div className="flex flex-wrap items-center gap-4">
-            <button
-              type="button"
-              onClick={downloadPublishedPdf}
-              disabled={busy || exportingPdf}
-              className="rounded-full border border-burgundy px-4 py-2 text-xs font-bold text-burgundy hover:bg-page disabled:opacity-50"
-            >
-              {exportingPdf
-                ? 'Preparing PDF…'
-                : 'Download published results as PDF'}
-            </button>
-
-            <button
-              type="button"
-              onClick={load}
-              disabled={busy || exportingPdf}
-              className="text-xs font-bold text-burgundy hover:underline disabled:opacity-50"
-            >
-              Refresh
-            </button>
-          </div>
+                    <button
+                      type="button"
+                      onClick={() => remove(row)}
+                      disabled={busy}
+                      className="text-xs font-bold text-burgundy-dark hover:underline disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </li>
               );
