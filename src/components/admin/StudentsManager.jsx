@@ -1,4 +1,5 @@
 import { mutationError } from '../../lib/adminMutation';
+import { studentSaveError } from '../../lib/studentSaveError';
 import LoadingInline from '../LoadingInline';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
@@ -38,7 +39,10 @@ export default function StudentsManager({ profile, teams = [], onChange }) {
     else if (superAdmin) result = await supabase.from('students').insert({ ...shared, team_id: form.team_id, is_attc: form.is_attc }).select('id');
     else result = await supabase.rpc('add_student_to_my_team', { p_name: shared.name, p_roll_number: shared.roll_number, p_photo_url: shared.photo_url });
     setBusy(false);
-    const saveError = superAdmin || editing ? mutationError(result, editing ? 'update' : 'create') : result.error?.message;
+   const saveError = studentSaveError(result, {
+  groupCreate: !superAdmin && !editing,
+  action: editing ? 'update' : 'create',
+});
     if (saveError) { setError(saveError); return; }
     setNotice(editing ? 'Student updated. Change recorded in the audit log.' : 'Student added to the assigned team. Change recorded in the audit log.'); reset(); await load(); onChange?.();
   }
