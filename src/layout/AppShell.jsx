@@ -20,7 +20,7 @@ export default function AppShell() {
     <ConnectionNotice />
     <header className="relative z-40 border-b border-line bg-white">
       <div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-2 px-5 sm:px-8">
-        <BrandMark showLogo={false} />
+        <BrandMark />
         <nav aria-label="Primary navigation" className="hidden items-center gap-1 min-[900px]:flex">
           {desktopLinks.map(item=><NavLink key={item.to} to={item.to} end={item.to==='/'} className={navClass}>{item.label}</NavLink>)}
           <details className="group relative" onKeyDown={e=>{if(e.key==='Escape')e.currentTarget.open=false;}}><summary className="flex cursor-pointer list-none items-center gap-1 rounded-full px-3 py-2 text-[13px] font-semibold text-muted hover:bg-paper hover:text-clay-800 [&::-webkit-details-marker]:hidden">More <ChevronDown size={14} className="group-open:rotate-180" aria-hidden="true" /></summary><div className="absolute right-0 top-[calc(100%+10px)] z-50 w-52 rounded-[18px] border border-line bg-white p-2 shadow-raised">{moreLinks.map(item=><NavLink key={item.to} to={item.to} onClick={e=>{e.currentTarget.closest('details').open=false;}} className={({isActive})=>`block rounded-xl px-3 py-2.5 text-sm font-semibold ${isActive?'bg-paper text-clay-700':'text-ink hover:bg-paper'}`}>{item.label}</NavLink>)}</div></details>
