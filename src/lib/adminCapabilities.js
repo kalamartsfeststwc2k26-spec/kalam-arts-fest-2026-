@@ -9,6 +9,7 @@ const festivalTabs = [
   ...ownTeamTabs,
   { key: 'results', label: 'Results' },
   { key: 'team_penalties', label: 'Team minus marks' },
+  { key: 'about_banners', label: 'About banner' },
   ...ADMIN_MODULES.map(item => ({ key: item.table, label: item.label })),
   { key: 'audit', label: 'Audit log' },
 ];

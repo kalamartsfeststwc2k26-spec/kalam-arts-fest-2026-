@@ -9,6 +9,7 @@ import RegistrationsManager from '../components/admin/RegistrationsManager';
 import ResultsManager from '../components/admin/ResultsManager';
 import TeamPenaltiesManager from '../components/admin/TeamPenaltiesManager';
 import UserManager from '../components/admin/UserManager';
+import AboutBannerManager from '../components/admin/AboutBannerManager';
 import { ADMIN_MODULES } from '../constants/adminModules';
 import { adminTabsForRole } from '../lib/adminCapabilities';
 import { supabase } from '../lib/supabaseClient';
