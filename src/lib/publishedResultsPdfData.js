@@ -90,14 +90,14 @@ export function makePublishedResultsPdf(
       kalamWatermark: watermarkDataUrl,
     },
 
-    // The source logo is 1046 × 568; keep its full aspect ratio and centre it.
+    // The source logo is 1600 × 1000; keep its full aspect ratio and centre it.
     background: (_currentPage, pageSize) => ({
       image: 'kalamWatermark',
       width: 380,
       opacity: 0.07,
       absolutePosition: {
         x: (pageSize.width - 380) / 2,
-        y: (pageSize.height - (380 * 568 / 1046)) / 2,
+        y: (pageSize.height - (380 * 1000 / 1600)) / 2,
       },
     }),
 

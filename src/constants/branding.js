@@ -1,5 +1,6 @@
 // Bundled locally so the full logo remains visible even if external storage is unavailable.
-export const LOGO_URL = '/kalam-logo-transparent.png';
+export const LOGO_URL = '/kalam-logo-college-v2.png';
+export const MARK_URL = '/kalam-mark-v2.png';
 export const BRAND = {
   name: 'KALAM',
   festival: 'College Arts Fest 2K26',

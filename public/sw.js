@@ -1,9 +1,9 @@
 // Online-first installability: cache only public, same-origin static assets.
 // Never intercept page navigation, Supabase, authentication, or admin requests.
-const CACHE_NAME = 'kalam-static-2026-10-30-v1';
+const CACHE_NAME = 'kalam-static-logo-v2';
 const STATIC_PATHS = new Set([
-  '/icon-192.png', '/icon-512.png', '/icon-maskable-512.png',
-  '/kalam-logo-transparent.png', '/kalam-logo.jpeg'
+  '/icon-192-v2.png', '/icon-512-v2.png', '/icon-maskable-512-v2.png',
+  '/kalam-logo-college-v2.png', '/kalam-mark-v2.png'
 ]);
 
 self.addEventListener('install', () => self.skipWaiting());

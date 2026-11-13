@@ -16,7 +16,7 @@ function toBase64(buffer) {
 
 async function preparePdfAssets() {
   // This existing public asset is bundled with the site; it is not a remote URL.
-  const logoUrl = `${import.meta.env.BASE_URL}kalam-logo-transparent.png`;
+  const logoUrl = `${import.meta.env.BASE_URL}kalam-logo-college-v2.png`;
 
   const [regularResponse, boldResponse, logoResponse] = await Promise.all([
     fetch(regularFontUrl),
