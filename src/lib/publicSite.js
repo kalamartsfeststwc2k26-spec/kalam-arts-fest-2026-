@@ -38,3 +38,9 @@ export async function fetchSiteContent(contentPage) {
   const rows = await fetchPages('site_content', 'content_key,content', query => query.eq('page', contentPage).eq('is_published', true).order('content_key'));
   return Object.fromEntries(rows.map(row => [row.content_key, row.content]));
 }
+
+// Paths are restricted to the dedicated public bucket; no external URL is used.
+export async function fetchAboutBanners() {
+  const rows = await fetchPages('about_banners', 'id,object_path,alt_text,sort_order', query => query.eq('is_published', true).order('sort_order').order('id'));
+  return rows.map(row => ({ ...row, url: supabase.storage.from('kalam-about-banners').getPublicUrl(row.object_path).data.publicUrl }));
+}
