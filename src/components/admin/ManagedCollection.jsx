@@ -1,5 +1,6 @@
 import { mutationError } from '../../lib/adminMutation';
 import LoadingInline from '../LoadingInline';
+import CommitteeMembersManager from './CommitteeMembersManager';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { readAllAdminRows } from '../../lib/adminRows';
@@ -15,7 +16,13 @@ function localDate(value) {
 function initial(fields, row) {
   return Object.fromEntries(fields.map(field => [field.key, field.type === 'boolean' ? Boolean(row?.[field.key]) : field.type === 'datetime' ? localDate(row?.[field.key]) : String(row?.[field.key] ?? field.default ?? '')]));
 }
-export default function ManagedCollection({ config, lookups = {}, onChange }) {
+export default function ManagedCollection(props) {
+  return props.config.table === 'committee_members'
+    ? <CommitteeMembersManager onChange={props.onChange} />
+    : <StandardManagedCollection {...props} />;
+}
+
+function StandardManagedCollection({ config, lookups = {}, onChange }) {
   const [rows, setRows] = useState([]);
   const [form, setForm] = useState(() => initial(config.fields));
   const [editing, setEditing] = useState(null);
