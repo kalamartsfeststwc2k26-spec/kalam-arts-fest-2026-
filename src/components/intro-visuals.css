@@ -1,0 +1,53 @@
+.kalam-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff;
+  opacity: 1;
+  transition: opacity 850ms cubic-bezier(.4, 0, .2, 1);
+}
+.kalam-intro--exit { opacity: 0; }
+.kalam-intro-scene {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+.kalam-intro-scene--visible { opacity: 1; }
+.kalam-intro-logo { position: relative; z-index: 1; width: min(82%, 500px); text-align: center; }
+.kalam-intro-colours {
+  position: absolute;
+  width: min(96vw, 760px);
+  aspect-ratio: 7 / 4;
+  pointer-events: none;
+  opacity: .8;
+}
+.kalam-intro-halo {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 15% 55%, rgba(212, 139, 46, .075), transparent 31%),
+    radial-gradient(ellipse at 84% 30%, rgba(240, 54, 133, .07), transparent 29%),
+    radial-gradient(ellipse at 78% 83%, rgba(43, 182, 213, .065), transparent 30%),
+    radial-gradient(ellipse at 33% 12%, rgba(139, 198, 54, .05), transparent 27%);
+  animation: kalam-breathe 3.8s ease-in-out infinite alternate;
+}
+.kalam-intro-orbit { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .55; animation: kalam-orbit 7s ease-in-out infinite alternate; }
+.kalam-dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; animation: kalam-float 3s ease-in-out infinite alternate; }
+.kalam-dot--pink { background: #e73b83; left: 12%; top: 36%; }
+.kalam-dot--blue { background: #29b4df; right: 12%; top: 41%; animation-delay: -.8s; }
+.kalam-dot--green { background: #88c830; left: 25%; bottom: 20%; width: 5px; height: 5px; animation-delay: -1.4s; }
+.kalam-dot--gold { background: #d79a2f; right: 25%; top: 15%; width: 5px; height: 5px; animation-delay: -2s; }
+@keyframes kalam-orbit { from { transform: rotate(-3deg) scale(.98); } to { transform: rotate(3deg) scale(1.02); } }
+@keyframes kalam-breathe { from { opacity: .6; transform: scale(.96); } to { opacity: 1; transform: scale(1.04); } }
+@keyframes kalam-float { from { transform: translateY(-5px); opacity: .55; } to { transform: translateY(5px); opacity: .9; } }
+@media (prefers-reduced-motion: reduce) {
+  .kalam-intro, .kalam-intro-scene { transition: none; }
+  .kalam-intro-colours { display: none; }
+}
