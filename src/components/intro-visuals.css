@@ -1,0 +1,35 @@
+.kalam-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #fff;
+  opacity: 1;
+  transition: opacity 850ms cubic-bezier(.4, 0, .2, 1);
+}
+.kalam-intro--exit { opacity: 0; }
+.kalam-intro-scene {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 500ms ease-out;
+}
+.kalam-intro-scene--visible { opacity: 1; }
+.kalam-intro-logo { position: relative; z-index: 1; width: min(82%, 500px); text-align: center; }
+/* Animate the original image as a single, unchanged piece. */
+.kalam-logo-enter { animation: kalam-logo-enter 3.3s cubic-bezier(.22, 1, .36, 1) both; transform-origin: center; }
+@keyframes kalam-logo-enter {
+  0%   { opacity: 0; transform: translateY(14px) scale(.965); }
+  48%  { opacity: 1; transform: translateY(0) scale(1.012); }
+  75%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kalam-intro, .kalam-intro-scene { transition: none; }
+  .kalam-logo-enter { animation: none; }
+}
