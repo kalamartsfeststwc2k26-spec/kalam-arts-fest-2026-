@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, RefreshCw, Users } from 'lucide-react';
 import DataState from '../components/DataState';
 import IdentityImage from '../components/IdentityImage';
+import StudentCard from '../components/teams/StudentCard';
 import SectionHeading from '../components/SectionHeading';
 import { fetchTeamDetail, fetchTeamsData } from '../lib/publicRecords';
 import { formatPoints, sumTeamPoints, sumTeamDeductions, makeTeamStandings } from '../lib/rankings';
@@ -258,34 +259,7 @@ export function TeamDetailPage() {
             ) : (
               <div className="grid gap-4 sm:grid-cols-2">
                 {data.roster.map(student => (
-                  <article
-                    key={student.student_id}
-                    className="flex items-center gap-4 rounded-panel border border-line bg-white p-4 shadow-soft sm:p-5"
-                  >
-                    <IdentityImage
-                      src={student.photo_url}
-                      name={student.student_name}
-                      kind="student"
-                      className="h-14 w-14"
-                    />
-
-                    <div className="min-w-0">
-                      <h3 className="break-words text-sm font-bold text-navy">
-                        {student.student_name}
-                      </h3>
-
-                      {student.roll_number && (
-                        <p className="mt-1 text-xs text-muted">
-                          Roll no. {student.roll_number}
-                        </p>
-                      )}
-
-                      <p className="mt-1 text-xs text-muted">
-                        {student.division}
-                        {student.is_attc ? ' · ATTC category' : ''}
-                      </p>
-                    </div>
-                  </article>
+                  <StudentCard key={student.student_id} student={student} />
                 ))}
               </div>
             )}
