@@ -43,6 +43,7 @@ export default function ResultsManager({ lookups, onChange }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [exportingCsv, setExportingCsv] = useState(false);
   const [error, setError] = useState('');
   const [readError, setReadError] = useState('');
   const [notice, setNotice] = useState('');
@@ -411,7 +412,7 @@ export default function ResultsManager({ lookups, onChange }) {
   }
 
   async function downloadPublishedPdf() {
-    if (busy || exportingPdf) return;
+    if (busy || exportingPdf || exportingCsv) return;
 
     setError('');
     setNotice('');
@@ -445,6 +446,30 @@ export default function ResultsManager({ lookups, onChange }) {
       );
     } finally {
       setExportingPdf(false);
+    }
+  }
+
+  async function downloadPublishedCsv() {
+    if (busy || exportingPdf || exportingCsv) return;
+    setError('');
+    setNotice('');
+    setExportingCsv(true);
+    try {
+      // Use the same fresh public-published view as the PDF, never admin drafts.
+      const results = await fetchResultsData();
+      if (!results.length) {
+        setNotice('There are no public published results to download.');
+        return;
+      }
+      const { downloadPublishedResultsCsv, fetchCsvStudentPhotos } = await import('../../lib/publishedResultsCsv');
+      const photos = await fetchCsvStudentPhotos(supabase, results);
+      downloadPublishedResultsCsv(results, photos);
+      setNotice(`CSV prepared with ${results.length} published result${results.length === 1 ? '' : 's'}.`);
+    } catch (cause) {
+      const knownError = ['Could not load student photo URLs. Please try again.', 'The results changed during download. Please try again.'].includes(cause?.message);
+      setError(knownError ? cause.message : 'Could not download the CSV. Please check your connection and try again.');
+    } finally {
+      setExportingCsv(false);
     }
   }
 
@@ -766,7 +791,7 @@ export default function ResultsManager({ lookups, onChange }) {
             <button
               type="button"
               onClick={downloadPublishedPdf}
-              disabled={busy || exportingPdf}
+              disabled={busy || exportingPdf || exportingCsv}
               className="rounded-full border border-burgundy px-4 py-2 text-xs font-bold text-burgundy hover:bg-page disabled:opacity-50"
             >
               {exportingPdf
@@ -776,8 +801,17 @@ export default function ResultsManager({ lookups, onChange }) {
 
             <button
               type="button"
+              onClick={downloadPublishedCsv}
+              disabled={busy || exportingPdf || exportingCsv}
+              className="rounded-full border border-burgundy px-4 py-2 text-xs font-bold text-burgundy hover:bg-page disabled:opacity-50"
+            >
+              {exportingCsv ? 'Preparing CSV…' : 'Download published results as CSV'}
+            </button>
+
+            <button
+              type="button"
               onClick={load}
-              disabled={busy || exportingPdf}
+              disabled={busy || exportingPdf || exportingCsv}
               className="text-xs font-bold text-burgundy hover:underline disabled:opacity-50"
             >
               Refresh
