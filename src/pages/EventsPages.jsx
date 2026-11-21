@@ -1,7 +1,7 @@
 import { friendlyQueryError } from '../lib/friendlyError';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, CalendarDays, Clock3, MapPin, RefreshCw, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CalendarDays, Clock3, MapPin, RefreshCw, Search, Users } from 'lucide-react';
 import DataState from '../components/DataState';
 import SectionHeading from '../components/SectionHeading';
 import SelectField from '../components/SelectField';
@@ -9,6 +9,7 @@ import { COMPETITION_TYPES } from '../constants/branding';
 import { categoryStyle } from '../constants/festivalTheme';
 import { eventSchedule, eventStatus } from '../lib/eventUtils';
 import { useEventDetails, usePublicEvents } from '../lib/useEvents';
+import { matchesProgrammeSearch } from '../lib/programmeSearch';
 
 function useCurrentTime() {
   const [now, setNow] = useState(Date.now());
@@ -43,20 +44,23 @@ export function EventsPage() {
   const [searchParams] = useSearchParams();
   const selectedType = COMPETITION_TYPES.includes(searchParams.get('type')) ? searchParams.get('type') : '';
   const [filters, setFilters] = useState({ status: '', day_label: '' });
+  const [query, setQuery] = useState('');
   const days = useMemo(() => [...new Set((events || []).map(event => event.day_label?.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })), [events]);
   const filtered = useMemo(() => (events || []).filter(event =>
+    matchesProgrammeSearch(event, query) &&
     (!filters.status || eventStatus(event, now) === filters.status) &&
     (!selectedType || event.competition_type === selectedType) &&
-    (!filters.day_label || event.day_label?.trim() === filters.day_label)), [events, filters, now, selectedType]);
+    (!filters.day_label || event.day_label?.trim() === filters.day_label)), [events, filters, now, selectedType, query]);
   const change = key => e => setFilters(current => ({ ...current, [key]: e.target.value }));
   return <div className="mx-auto max-w-[1240px] px-5 pb-24 pt-10 sm:px-8 sm:pt-14 lg:px-10">
     <div className="flex flex-wrap items-end justify-between gap-4"><SectionHeading eyebrow="KALAM / 2026" title="Events" description="Explore the published programmes and their schedules." /><button type="button" onClick={refresh} className="mb-8 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-xs font-bold text-navy hover:bg-page focus-visible:outline focus-visible:outline-2 focus-visible:outline-burgundy"><RefreshCw size={14} aria-hidden="true" />Refresh</button></div>
     <nav aria-label="Filter by competition category" className="mb-5 flex gap-2 overflow-x-auto pb-2">{['',...COMPETITION_TYPES].map(type => <Link key={type || 'all'} to={type ? `/events?type=${encodeURIComponent(type)}` : '/events'} aria-current={selectedType === type ? 'page' : undefined} className={`shrink-0 rounded-full border px-4 py-2.5 text-[13px] font-semibold ${selectedType === type ? 'border-clay-700 bg-clay-700 text-white' : 'border-line bg-white text-muted hover:text-clay-800'}`}>{type || 'All'}</Link>)}</nav>
     <div className="mb-7 grid gap-4 rounded-panel border border-line bg-white p-5 shadow-panel sm:grid-cols-2 sm:p-6">
+      <label htmlFor="event-query" className="block text-sm font-semibold text-ink sm:col-span-2">Search programmes<div className="relative mt-2"><Search size={17} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" /><input id="event-query" type="search" autoComplete="off" value={query} onChange={e => setQuery(e.target.value)} placeholder="Programme name or item label" className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-3 text-sm text-ink placeholder:text-muted focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy" /></div></label>
       <SelectField id="status-filter" label="Status" allLabel="All statuses" options={statusNames} value={filters.status} onChange={change('status')} />
       <SelectField id="day-filter" label="Day label" allLabel="All day labels" options={days} value={filters.day_label} onChange={change('day_label')} />
     </div>
-    <DataArea status={status} error={error} refresh={refresh} emptyTitle={events?.length ? 'No matching events' : 'No events published yet'} emptyDescription={events?.length ? 'Try another combination of filters.' : 'Published programmes will appear here when available.'}>
+    <DataArea status={status} error={error} refresh={refresh} emptyTitle={events?.length ? 'No matching events' : 'No events published yet'} emptyDescription={events?.length ? 'Try changing your search or filters.' : 'Published programmes will appear here when available.'}>
       {filtered.length > 0 && <><p className="mb-4 text-xs font-semibold tabular-nums text-muted">{filtered.length} {filtered.length === 1 ? 'event' : 'events'}</p><div className="grid gap-4 sm:grid-cols-2 min-[1040px]:grid-cols-3">{filtered.map(event => <EventCard key={event.id} event={event} now={now} />)}</div></>}
     </DataArea>
   </div>;
