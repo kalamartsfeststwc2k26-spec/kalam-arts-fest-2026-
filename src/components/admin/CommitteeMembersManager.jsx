@@ -1,3 +1,5 @@
+import AdminSearch from './AdminSearch';
+import { matchesAdminSearch } from '../../lib/adminSearch';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import LoadingInline from '../LoadingInline';
 import CommitteePhotoCrop from './CommitteePhotoCrop';
@@ -11,6 +13,7 @@ function formFor(row) {
   return Object.fromEntries(fields.map(key => [key, key === 'is_published' ? Boolean(row?.[key]) : String(row?.[key] ?? (key === 'sort_order' ? 0 : ''))]));
 }
 export default function CommitteeMembersManager({ onChange }) {
+  const [search, setSearch] = useState('');
   const [rows, setRows] = useState([]), [form, setForm] = useState(blank), [editing, setEditing] = useState(null);
   const [photo, setPhoto] = useState(null), [busy, setBusy] = useState(false), [loading, setLoading] = useState(true);
   const [readError, setReadError] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState('');
@@ -90,7 +93,7 @@ export default function CommitteeMembersManager({ onChange }) {
       <div className="mt-6 flex gap-3"><button disabled={busy} className="rounded-full bg-burgundy px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50">{busy ? 'Saving…' : editing ? 'Save changes' : 'Create record'}</button>{editing && <button type="button" disabled={busy} onClick={reset} className="rounded-full border border-line px-5 py-2.5 text-sm font-bold text-navy">Cancel edit</button>}</div>
     </form>
     <div className="rounded-panel border border-line bg-white p-5 shadow-soft sm:p-7"><div className="mb-4 flex justify-between"><h3 className="font-bold text-navy">Existing records</h3><button disabled={busy} onClick={load} className="text-xs font-bold text-burgundy hover:underline">Refresh</button></div>
-      {loading ? <LoadingInline label="Loading records…" /> : readError ? <p role="alert" className="text-sm text-burgundy">{readError}</p> : !rows.length ? <p className="text-sm text-muted">No committee members yet. Add one above.</p> : <ul className="divide-y divide-line">{rows.map(row => <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="text-sm font-bold text-navy">{row.name}</p><p className="text-xs text-muted">{row.role_title} · {row.is_published ? 'Published' : 'Unpublished'}</p></div><div className="flex gap-3"><button disabled={busy} onClick={() => edit(row)} className="text-xs font-bold text-burgundy hover:underline">Edit</button><button disabled={busy} onClick={() => remove(row)} className="text-xs font-bold text-burgundy-dark hover:underline">Delete</button></div></li>)}</ul>}
+      <AdminSearch label="Search committee members" value={search} onChange={setSearch} placeholder="Name, role, email or phone" />{loading ? <LoadingInline label="Loading records…" /> : readError ? <p role="alert" className="text-sm text-burgundy">{readError}</p> : !rows.length ? <p className="text-sm text-muted">No committee members yet. Add one above.</p> : !rows.filter(row => matchesAdminSearch(search, row.name, row.role_title, row.contact_email, row.contact_phone)).length ? <p className="text-sm text-muted">No matching records.</p> : <ul className="divide-y divide-line">{rows.filter(row => matchesAdminSearch(search, row.name, row.role_title, row.contact_email, row.contact_phone)).map(row => <li key={row.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><div><p className="text-sm font-bold text-navy">{row.name}</p><p className="text-xs text-muted">{row.role_title} · {row.is_published ? 'Published' : 'Unpublished'}</p></div><div className="flex gap-3"><button disabled={busy} onClick={() => edit(row)} className="text-xs font-bold text-burgundy hover:underline">Edit</button><button disabled={busy} onClick={() => remove(row)} className="text-xs font-bold text-burgundy-dark hover:underline">Delete</button></div></li>)}</ul>}
     </div>
   </section>;
 }
