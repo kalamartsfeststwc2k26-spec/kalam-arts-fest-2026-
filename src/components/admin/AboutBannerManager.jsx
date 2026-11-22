@@ -1,3 +1,5 @@
+import AdminSearch from './AdminSearch';
+import { matchesAdminSearch } from '../../lib/adminSearch';
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { BANNER_HEIGHT, BANNER_WIDTH, cropBannerImage, cropGeometry, MAX_IMAGE_BYTES } from '../../lib/bannerCrop';
@@ -9,6 +11,8 @@ const buttonClass = 'rounded-full border border-line px-4 py-2 text-sm font-semi
 
 export default function AboutBannerManager() {
   const [rows, setRows] = useState([]);
+  const [search, setSearch] = useState('');
+  const visibleRows = rows.filter(row => matchesAdminSearch(search, row.alt_text, row.sort_order, row.is_published ? 'published' : 'hidden'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
@@ -131,7 +135,7 @@ export default function AboutBannerManager() {
       <div className="flex flex-wrap gap-3"><button disabled={busy} className="rounded-full bg-burgundy px-5 py-2.5 text-sm font-bold text-white disabled:opacity-50">{busy ? 'Saving…' : 'Save banner'}</button>{editing && <button type="button" disabled={busy} onClick={reset} className={buttonClass}>Cancel edit</button>}</div>
     </form>
     <div className="rounded-panel border border-line bg-white p-5 shadow-soft sm:p-7"><div className="flex items-center justify-between"><h3 className="font-bold text-navy">Images</h3><button type="button" disabled={busy} onClick={load} className={buttonClass}>Refresh</button></div>
-      {loading ? <p className="mt-4 text-sm text-muted">Loading…</p> : !rows.length ? <p className="mt-4 text-sm text-muted">No banner images yet.</p> : <ul className="mt-4 divide-y divide-line">{rows.map(row => <li key={row.id} className="flex flex-wrap items-center gap-4 py-4"><img src={supabase.storage.from(BUCKET).getPublicUrl(row.object_path).data.publicUrl} alt="" className="h-20 w-28 rounded-lg bg-page object-cover" /><div className="min-w-0 flex-1"><p className="break-words text-sm font-bold text-navy">{row.alt_text}</p><p className="text-xs text-muted">Order {row.sort_order} · {row.is_published ? 'Published' : 'Hidden'}</p></div><button type="button" disabled={busy} onClick={() => edit(row)} className={buttonClass}>Edit</button><button type="button" disabled={busy} onClick={() => remove(row)} className={buttonClass}>Remove</button></li>)}</ul>}
+      <AdminSearch label="Search about banners" value={search} onChange={setSearch} placeholder="Description, order or status" />{loading ? <p className="mt-4 text-sm text-muted">Loading…</p> : !rows.length ? <p className="mt-4 text-sm text-muted">No banner images yet.</p> : !visibleRows.length ? <p className="text-sm text-muted">No matching records.</p> : <ul className="mt-4 divide-y divide-line">{visibleRows.map(row => <li key={row.id} className="flex flex-wrap items-center gap-4 py-4"><img src={supabase.storage.from(BUCKET).getPublicUrl(row.object_path).data.publicUrl} alt="" className="h-20 w-28 rounded-lg bg-page object-cover" /><div className="min-w-0 flex-1"><p className="break-words text-sm font-bold text-navy">{row.alt_text}</p><p className="text-xs text-muted">Order {row.sort_order} · {row.is_published ? 'Published' : 'Hidden'}</p></div><button type="button" disabled={busy} onClick={() => edit(row)} className={buttonClass}>Edit</button><button type="button" disabled={busy} onClick={() => remove(row)} className={buttonClass}>Remove</button></li>)}</ul>}
     </div>
   </section>;
 }

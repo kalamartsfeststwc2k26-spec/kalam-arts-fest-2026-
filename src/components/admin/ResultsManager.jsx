@@ -1,3 +1,5 @@
+import AdminSearch from './AdminSearch';
+import { matchesAdminSearch } from '../../lib/adminSearch';
 import { mutationError } from '../../lib/adminMutation';
 import { useEffect, useMemo, useState } from 'react';
 import LoadingInline from '../LoadingInline';
@@ -49,6 +51,7 @@ export default function ResultsManager({ lookups, onChange }) {
   const [notice, setNotice] = useState('');
   const [lastEdits, setLastEdits] = useState(new Map());
   const [statusFilter, setStatusFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState([]);
   const [preview, setPreview] = useState({
     status: 'idle',
@@ -325,9 +328,14 @@ export default function ResultsManager({ lookups, onChange }) {
     onChange?.();
   }
 
-  const visibleRows = rows.filter(
-    row => statusFilter === 'all' || row.status === statusFilter
+  const visibleRows = rows.filter(row =>
+    (statusFilter === 'all' || row.status === statusFilter) &&
+    matchesAdminSearch(search,
+      (lookups.events || []).find(item => item.id === row.event_id)?.name,
+      (lookups.students || []).find(item => item.id === row.student_id)?.name,
+      (lookups.teams || []).find(item => item.id === row.team_id)?.name)
   );
+  function changeSearch(value) { setSelectedIds([]); setSearch(value); }
 
   function selectDraft(id, selected) {
     setSelectedIds(current =>
@@ -819,6 +827,8 @@ export default function ResultsManager({ lookups, onChange }) {
           </div>
         </div>
 
+        <AdminSearch label="Search results" value={search} onChange={changeSearch} placeholder="Programme, student or team" note="Search filters the list only; PDF and CSV downloads still include published results." />
+
         <div
           role="group"
           aria-label="Filter results by publication status"
@@ -882,7 +892,7 @@ export default function ResultsManager({ lookups, onChange }) {
         ) : !visibleRows.length ? (
           <p className="text-sm text-muted">
             {rows.length
-              ? 'No results match this status.'
+              ? 'No results match this search and status.'
               : 'No results entered yet. Add a result above; Edit and Delete appear beside saved results.'}
           </p>
         ) : (
