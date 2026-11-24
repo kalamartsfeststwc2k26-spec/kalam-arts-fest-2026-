@@ -1,3 +1,5 @@
+import IndiaDateTimeInput from './IndiaDateTimeInput';
+import { indiaInputToIso } from '../../lib/indiaTime';
 import AdminSearch from './AdminSearch';
 import { matchesAdminSearch } from '../../lib/adminSearch';
 import { mutationError } from '../../lib/adminMutation';
@@ -26,17 +28,6 @@ const blank = {
 const inputClass =
   'mt-1.5 w-full rounded-xl border border-line bg-white px-3 py-2.5 text-sm text-ink focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy';
 
-function localDate(value) {
-  if (!value) return '';
-
-  const date = new Date(value);
-
-  return Number.isNaN(date.getTime())
-    ? ''
-    : new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-        .toISOString()
-        .slice(0, 16);
-}
 
 export default function ResultsManager({ lookups, onChange }) {
   const [rows, setRows] = useState([]);
@@ -215,7 +206,7 @@ export default function ResultsManager({ lookups, onChange }) {
       placement: row.placement == null ? '' : String(row.placement),
       grade: row.grade || '',
       status: row.status,
-      published_at: localDate(row.published_at),
+      published_at: row.published_at || '',
       points_source: row.points_source || 'manual',
       points: String(row.points ?? ''),
       points_explanation:
@@ -274,6 +265,8 @@ export default function ResultsManager({ lookups, onChange }) {
       return;
     }
 
+    let publicationTime;
+    try { publicationTime = indiaInputToIso(form.published_at); } catch { setError('Publication date: enter a complete valid date and time in IST, or clear it.'); return; }
     const payload = {
       event_id: form.event_id,
       student_id: form.student_id || null,
@@ -281,14 +274,7 @@ export default function ResultsManager({ lookups, onChange }) {
       placement: Number(form.placement),
       grade: form.grade || null,
       status: form.status,
-      published_at:
-        form.status === 'published'
-          ? form.published_at
-            ? new Date(form.published_at).toISOString()
-            : new Date().toISOString()
-          : form.published_at
-            ? new Date(form.published_at).toISOString()
-            : null,
+      published_at: publicationTime || (form.status === 'published' ? new Date().toISOString() : null),
       points_source: form.points_source,
       points: calculated
         ? Number(preview.data.total)
@@ -652,15 +638,7 @@ export default function ResultsManager({ lookups, onChange }) {
             </select>
           </label>
 
-          <label className="text-sm font-semibold text-ink">
-            Publication date (optional)
-            <input
-              className={inputClass}
-              type="datetime-local"
-              value={form.published_at}
-              onChange={e => set('published_at', e.target.value)}
-            />
-          </label>
+          <IndiaDateTimeInput label="Publication date (optional)" value={form.published_at} onChange={value => set('published_at', value)} />
         </div>
 
         <fieldset className="mt-6 rounded-xl border border-line p-4">
