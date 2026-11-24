@@ -1,3 +1,4 @@
+import { indiaDateForFilename } from './indiaTime.js';
 // CSV is made only from the public published-results view and public roster.
 // IDs and publication metadata are used for validation/lookup, never exported.
 export const CSV_HEADERS = ['Student name', 'Programme name', 'Position', 'Grade', 'Student photo URL'];
@@ -60,7 +61,7 @@ export function downloadPublishedResultsCsv(results, photos) {
   const link = document.createElement('a');
   try {
     link.href = url;
-    link.download = `KALAM-published-results-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.download = `KALAM-published-results-${indiaDateForFilename(new Date())}.csv`;
     document.body.appendChild(link);
     link.click();
   } finally {

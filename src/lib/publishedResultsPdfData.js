@@ -16,7 +16,7 @@ export function formatPdfDate(value) {
 
   return Number.isNaN(date.getTime())
     ? '—'
-    : `${indiaDateTime.format(date)} IST`;
+    : indiaDateTime.format(date);
 }
 
 export function makePublishedResultsPdf(

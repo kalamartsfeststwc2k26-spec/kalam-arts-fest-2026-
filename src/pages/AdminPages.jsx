@@ -1,3 +1,4 @@
+import { formatIndiaTimestamp } from '../lib/indiaTime';
 import AdminSearch from '../components/admin/AdminSearch';
 import { matchesAdminSearch } from '../lib/adminSearch';
 import LoadingInline from '../components/LoadingInline';
@@ -48,14 +49,14 @@ export function AdminLoginPage() {
 function AuditPanel() {
   const [state, setState] = useState({ status: 'loading', rows: [], error: '' });
   const [search, setSearch] = useState('');
-  const visibleRows = state.rows.filter(row => matchesAdminSearch(search, row.action, row.entity_table, row.actor_id, row.entity_id, new Date(row.occurred_at).toLocaleString('en-IN')));
+  const visibleRows = state.rows.filter(row => matchesAdminSearch(search, row.action, row.entity_table, row.actor_id, row.entity_id, formatIndiaTimestamp(row.occurred_at)));
   async function load() {
     setState(previous => ({ ...previous, status: 'loading' }));
     const { data, error } = await supabase.from('admin_audit_log').select('id,actor_id,action,entity_table,entity_id,occurred_at').order('occurred_at', { ascending: false }).limit(100);
     setState(error ? { status: 'error', rows: [], error: error.message } : { status: 'ready', rows: data, error: '' });
   }
   useEffect(() => { load(); }, []);
-  return <div className="rounded-panel border border-line bg-white p-6 shadow-soft"><div className="mb-5 flex justify-between"><h2 className="text-xl font-bold text-navy">Audit log</h2><button onClick={load} className="text-xs font-bold text-burgundy hover:underline">Refresh</button></div><AdminSearch label="Search audit log" value={search} onChange={setSearch} placeholder="Action, table, actor or record ID" note="Search covers only the latest 100 loaded audit records." />{state.status === 'loading' ? <LoadingInline label="Loading audit records…" /> : state.status === 'error' ? <p role="alert" className="text-sm text-burgundy">{state.error}</p> : !state.rows.length ? <p className="text-sm text-muted">No changes recorded yet.</p> : !visibleRows.length ? <p className="text-sm text-muted">No matching records.</p> : <ul className="divide-y divide-line">{visibleRows.map(row => <li key={row.id} className="py-3 text-sm"><p className="font-bold text-navy">{row.action} · {row.entity_table}</p><p className="mt-1 break-all text-xs text-muted">{new Date(row.occurred_at).toLocaleString('en-IN')} · Actor {row.actor_id || 'trusted server'} · Record {row.entity_id || '—'}</p></li>)}</ul>}</div>;
+  return <div className="rounded-panel border border-line bg-white p-6 shadow-soft"><div className="mb-5 flex justify-between"><h2 className="text-xl font-bold text-navy">Audit log</h2><button onClick={load} className="text-xs font-bold text-burgundy hover:underline">Refresh</button></div><AdminSearch label="Search audit log" value={search} onChange={setSearch} placeholder="Action, table, actor or record ID" note="Search covers only the latest 100 loaded audit records." />{state.status === 'loading' ? <LoadingInline label="Loading audit records…" /> : state.status === 'error' ? <p role="alert" className="text-sm text-burgundy">{state.error}</p> : !state.rows.length ? <p className="text-sm text-muted">No changes recorded yet.</p> : !visibleRows.length ? <p className="text-sm text-muted">No matching records.</p> : <ul className="divide-y divide-line">{visibleRows.map(row => <li key={row.id} className="py-3 text-sm"><p className="font-bold text-navy">{row.action} · {row.entity_table}</p><p className="mt-1 break-all text-xs text-muted">{formatIndiaTimestamp(row.occurred_at)} · Actor {row.actor_id || 'trusted server'} · Record {row.entity_id || '—'}</p></li>)}</ul>}</div>;
 }
 function SuperDashboard({ profile }) {
   const [tab, setTab] = useState('users');

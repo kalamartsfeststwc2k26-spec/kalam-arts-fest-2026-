@@ -1,3 +1,4 @@
+import { formatIndiaTimestamp } from '../lib/indiaTime';
 import { friendlyQueryError } from '../lib/friendlyError';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -15,8 +16,7 @@ import { formatPoints } from '../lib/rankings';
 import { usePublicData } from '../lib/usePublicData';
 
 function publishedDate(value) {
-  if (!value || !Number.isFinite(Date.parse(value))) return 'Publication time unavailable';
-  return new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+  return formatIndiaTimestamp(value, 'Publication time unavailable');
 }
 export default function ResultsPage() {
   const { status, data: results, error, refresh } = usePublicData(fetchResultsData, 'results');

@@ -1,9 +1,9 @@
+import { formatIndiaTimestamp } from './indiaTime';
 import { supabase } from './supabaseClient';
 
 export function formatAdminTimestamp(value) {
   if (!value) return 'Not recorded';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? 'Not recorded' : date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+  return formatIndiaTimestamp(value);
 }
 
 // Updated-at does not exist on events/results. Use the append-only audit timestamp instead.

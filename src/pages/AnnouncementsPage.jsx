@@ -1,3 +1,4 @@
+import { formatIndiaTimestamp } from '../lib/indiaTime';
 import { friendlyQueryError } from '../lib/friendlyError';
 import { Bell, RefreshCw } from 'lucide-react';
 import DataState from '../components/DataState';
@@ -6,8 +7,7 @@ import { fetchAnnouncements } from '../lib/publicSite';
 import { usePublicData } from '../lib/usePublicData';
 
 function postedDate(value) {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? 'Date unavailable' : new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }).format(date);
+  return formatIndiaTimestamp(value, 'Date unavailable');
 }
 export default function AnnouncementsPage() {
   const { status, data, error, refresh } = usePublicData(fetchAnnouncements, 'announcements');
