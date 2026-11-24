@@ -6,7 +6,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata
 export function formatIndiaTimestamp(value, fallback = 'Not recorded') {
   if (!value) return fallback;
   const date = new Date(value);
-  return Number.isFinite(date.getTime()) ? `${formatter.format(date)} IST` : fallback;
+  return Number.isFinite(date.getTime()) ? formatter.format(date) : fallback;
 }
 export function indiaDateForFilename(value) {
   const date = new Date(value);
