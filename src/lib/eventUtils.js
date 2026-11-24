@@ -28,7 +28,7 @@ export function formatEventDate(value) {
 export function formatEventTime(value) {
   const time = validTime(value);
   if (time === null) return null;
-  return new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit' }).format(time);
+  return `${new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true }).format(time)} IST`;
 }
 export function eventSchedule(event) {
   if (eventStatus(event) === 'Schedule TBA') return 'Schedule TBA';
