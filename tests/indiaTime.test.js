@@ -22,9 +22,11 @@ test('unchanged stored instant is preserved including fractional precision', () 
   assert.deepEqual(indiaInputParts(original),{date:'2026-11-22',hour:'12',minute:'00',period:'AM'});
 });
 test('display and download date use India time',()=>{
-  assert.match(formatIndiaTimestamp('2026-11-21T18:30:00Z'), /22 Nov 2026.*12:00.*am IST/i);
+  assert.match(formatIndiaTimestamp('2026-11-21T18:30:00Z'), /22 Nov 2026.*12:00.*am/i);
   assert.equal(indiaDateForFilename('2026-11-21T18:30:00Z'),'2026-11-22');
-  assert.match(formatEventTime('2026-11-22T13:30:00Z'),/7:00.*pm IST/i);
+  assert.match(formatEventTime('2026-11-22T13:30:00Z'),/7:00.*pm/i);
+  assert.doesNotMatch(formatEventTime('2026-11-22T13:30:00Z'), /IST/);
+  assert.doesNotMatch(formatIndiaTimestamp('2026-11-21T18:30:00Z'), /IST/);
   assert.match(eventSchedule({start_time:'2026-11-21T18:00:00Z',end_time:'2026-11-21T19:30:00Z'}),/21 Nov 2026.*22 Nov 2026/);
   assert.equal(eventStatus({start_time:'2026-11-21T18:00:00Z',end_time:'2026-11-21T19:30:00Z'},Date.parse('2026-11-21T18:45:00Z')),'Live');
 });

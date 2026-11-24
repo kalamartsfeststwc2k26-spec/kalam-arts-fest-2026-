@@ -33,7 +33,8 @@ test('includes individual, team, scoring and Malayalam values in the report', ()
     table.body[1].slice(0, 6),
     ['കലാമേള', 'ഫാത്തിമ', 'KALIDOS', '1', 'A', '6']
   );
-  assert.match(table.body[1][6], /IST/);
+  assert.doesNotMatch(table.body[1][6], /IST/);
+  assert.equal(table.body[0][6].text, 'Published (IST)');
   assert.match(doc.content[2].text, /Results: 1/);
 });
 
@@ -65,7 +66,7 @@ test('rejects empty, duplicate, draft and missing-publication data', () => {
 
 test('reports dates in India time and handles invalid dates', () => {
   assert.match(formatPdfDate('2026-11-02T06:00:00Z'), /11:30/);
-  assert.match(formatPdfDate('2026-11-02T06:00:00Z'), /IST/);
+  assert.doesNotMatch(formatPdfDate('2026-11-02T06:00:00Z'), /IST/);
   assert.equal(formatPdfDate('invalid'), '—');
 });
 
