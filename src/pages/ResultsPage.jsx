@@ -3,7 +3,7 @@ import { formatIndiaTimestamp } from '../lib/indiaTime';
 import { friendlyQueryError } from '../lib/friendlyError';
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, RefreshCw, Search, Trophy } from 'lucide-react';
+import { CalendarDays, RefreshCw, Search, Users } from 'lucide-react';
 import DataState from '../components/DataState';
 import IdentityImage from '../components/IdentityImage';
 import { supabase } from '../lib/supabaseClient';
@@ -53,17 +53,22 @@ export default function ResultsPage() {
             <p className="text-xs font-semibold text-muted">{filtered ? `Filtered: ${group.rows.length} of ${group.total} published results` : `${group.rows.length} published ${group.rows.length === 1 ? 'result' : 'results'}`}</p>
           </div>
           {group.sharedPublishedAt && <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted"><CalendarDays size={13} aria-hidden="true" />{filtered ? 'Shown results published: ' : 'Published: '}{publishedDate(group.sharedPublishedAt)}</p>}
-          <ul className="mt-3 divide-y divide-line border-t border-line">{group.rows.map(row => <li key={row.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 last:pb-0">
-            <span className="min-w-[3.75rem] rounded-full bg-paper px-2.5 py-1 text-center text-xs font-bold text-clay-800">{row.placement == null ? 'Place —' : `Place ${row.placement}`}</span>
-            {row.student_id && <IdentityImage src={photos[row.student_id]} name={row.student_name || 'Student'} kind="student" className="h-11 w-11" />}
-            <div className="min-w-0 flex-1">
-              <p className="break-words text-sm font-semibold text-navy">{row.student_name || row.team_name || 'Recipient not listed'}</p>
-              {row.student_name && row.team_name && <p className="mt-0.5 text-xs text-muted">Team: {row.team_name}</p>}
-              {!group.sharedPublishedAt && <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted"><CalendarDays size={13} aria-hidden="true" />{publishedDate(row.published_at)}</p>}
+          <ul className="mt-4 grid grid-cols-1 gap-3 border-t border-line pt-4 sm:gap-4 md:grid-cols-3">{group.rows.map(row => <li key={row.id} className="min-w-0 rounded-tile border border-white/80 bg-white/60 p-4 shadow-panel backdrop-blur-sm sm:p-5">
+            <div className="flex items-start justify-between gap-2">
+              <span className="rounded-full border border-line bg-paper/90 px-3 py-1 text-xs font-bold text-clay-800">{row.placement == null ? 'Place —' : `Place ${row.placement}`}</span>
+              {row.grade && <span className="rounded-full border border-line bg-white/80 px-3 py-1 text-xs font-semibold text-muted">Grade {row.grade}</span>}
             </div>
-            <div className="ml-auto flex shrink-0 items-center gap-3 text-right">
-              {row.grade && <span className="text-xs font-semibold text-muted">Grade {row.grade}</span>}
-              <span className="whitespace-nowrap text-base font-extrabold tabular-nums text-navy">{row.points == null ? '—' : formatPoints(Number(row.points))} <span className="text-xs font-medium text-muted">pts</span></span>
+            <div className="mt-4 flex min-w-0 items-center gap-4 md:flex-col md:text-center">
+              {row.student_id && <IdentityImage src={photos[row.student_id]} name={row.student_name || 'Student'} kind="student" className="h-24 w-24" />}
+              {!row.student_id && <span aria-hidden="true" className="grid h-24 w-24 shrink-0 place-items-center rounded-xl border border-line bg-page text-burgundy"><Users size={32} strokeWidth={1.5} /></span>}
+              <div className="min-w-0">
+                <p className="break-words text-base font-bold leading-snug text-navy">{row.student_name || row.team_name || 'Recipient not listed'}</p>
+                {row.student_name && row.team_name && <p className="mt-1 break-words text-sm text-muted">Team: {row.team_name}</p>}
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap items-end justify-between gap-2 border-t border-line pt-3 md:justify-center">
+              <span className="whitespace-nowrap text-lg font-extrabold tabular-nums text-navy">{row.points == null ? '—' : formatPoints(Number(row.points))} <span className="text-xs font-medium text-muted">pts</span></span>
+              {!group.sharedPublishedAt && <p className="inline-flex items-center gap-1.5 text-xs text-muted"><CalendarDays size={13} aria-hidden="true" />{publishedDate(row.published_at)}</p>}
             </div>
           </li>)}</ul>
         </article>;
