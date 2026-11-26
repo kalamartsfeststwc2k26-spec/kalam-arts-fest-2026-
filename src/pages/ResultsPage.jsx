@@ -1,3 +1,4 @@
+import { groupPublicResults } from '../lib/groupPublicResults';
 import { formatIndiaTimestamp } from '../lib/indiaTime';
 import { friendlyQueryError } from '../lib/friendlyError';
 import { useEffect, useMemo, useState } from 'react';
@@ -31,16 +32,42 @@ export default function ResultsPage() {
   const [type, setType] = useState('');
   const [grade, setGrade] = useState('');
   const grades = useMemo(() => [...new Set((results || []).map(row => row.grade).filter(Boolean))].sort(), [results]);
-  const visible = useMemo(() => (results || []).filter(row => {
-    const needle = query.trim().toLocaleLowerCase();
-    return (!needle || [row.event_name, row.student_name, row.team_name, row.item_category].some(value => String(value ?? '').toLocaleLowerCase().includes(needle)))
-      && (!type || row.competition_type === type)
-      && (!grade || row.grade === grade);
-  }), [results, query, type, grade]);
+  const groups = useMemo(() => groupPublicResults(results, { query, type, grade }), [results, query, type, grade]);
+  const visibleCount = groups.reduce((total, group) => total + group.rows.length, 0);
   return <div className="mx-auto max-w-[1120px] px-5 pb-24 pt-10 sm:px-8 sm:pt-14 lg:px-10">
     <div className="flex flex-wrap items-end justify-between gap-4"><SectionHeading eyebrow="Published / KALAM 2K26" title="Results" description="Search officially published results by event, student or team." /><button onClick={refresh} className="mb-8 inline-flex items-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-xs font-bold text-navy hover:bg-page"><RefreshCw size={14} aria-hidden="true" />Refresh</button></div>
     <div role="group" aria-label="Filter results by competition category" className="mb-5 flex gap-2 overflow-x-auto pb-2">{['',...COMPETITION_TYPES].map(item=><button key={item||'all'} type="button" aria-pressed={type===item} onClick={()=>setType(item)} className={`shrink-0 rounded-full border px-4 py-2.5 text-[13px] font-semibold ${type===item?'border-clay-700 bg-clay-700 text-white':'border-line bg-white text-muted hover:text-clay-800'}`}>{item||'All'}</button>)}</div>
     <div className="mb-7 grid gap-4 rounded-panel border border-line bg-white p-5 shadow-panel sm:grid-cols-2 sm:p-6"><label htmlFor="result-query" className="block text-sm font-semibold text-ink">Search results<div className="relative mt-2"><Search size={17} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" /><input id="result-query" type="search" value={query} onChange={e => setQuery(e.target.value)} placeholder="Event, student or team" className="w-full rounded-xl border border-line bg-white py-2.5 pl-10 pr-3 text-sm text-ink placeholder:text-muted focus:border-burgundy focus:outline-none focus:ring-2 focus:ring-burgundy" /></div></label><SelectField id="results-grade" label="Grade" options={grades} value={grade} onChange={e => setGrade(e.target.value)} /></div>
-    {status === 'loading' ? <DataState status="loading" /> : status === 'offline' ? <DataState status="offline" onRetry={refresh} /> : status === 'error' ? <DataState status="error" description={friendlyQueryError(error)} onRetry={refresh} /> : !visible.length ? <DataState status="empty" title={results?.length ? 'No matching results' : 'No results published yet'} description={results?.length ? 'Try changing your search or filters.' : 'Published results will appear here when available.'} /> : <><p className="mb-4 text-xs font-semibold tabular-nums text-muted">{visible.length} {visible.length === 1 ? 'result' : 'results'} · newest first</p><div className="grid gap-4">{visible.map(row => <article key={row.id} className="rounded-panel border border-line bg-white p-5 shadow-soft sm:p-6"><div className="flex flex-wrap items-start justify-between gap-3"><div className="min-w-0"><p className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${categoryStyle(row.competition_type).chip}`}>{row.competition_type}</p><p className="mt-2 text-xs text-muted">{row.item_category} · {row.division}</p><Link to={`/events/${encodeURIComponent(row.event_id)}`} className="mt-2 inline-block text-lg font-bold text-navy hover:text-burgundy hover:underline">{row.event_name}</Link></div><span className="rounded-full bg-paper px-3 py-1 text-xs font-bold text-clay-800">Place {row.placement}{row.grade ? ` · Grade ${row.grade}` : ''}</span></div><div className="mt-4 flex flex-wrap items-end justify-between gap-4 border-t border-line pt-4"><div className="flex min-w-0 items-center gap-3">{row.student_id && <IdentityImage src={photos[row.student_id]} name={row.student_name || 'Student'} kind="student" className="h-14 w-14" />}<div className="min-w-0"><p className="break-words text-sm font-semibold text-navy">{row.student_name || row.team_name || 'Recipient not listed'}</p>{row.student_name && row.team_name && <p className="mt-1 text-xs text-muted">Team: {row.team_name}</p>}<p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted"><CalendarDays size={13} aria-hidden="true" />{publishedDate(row.published_at)}</p></div></div><p className="whitespace-nowrap text-xl font-extrabold tabular-nums text-navy">{formatPoints(Number(row.points))} <span className="text-xs font-medium text-muted">pts</span></p></div></article>)}</div></>}
+    {status === 'loading' ? <DataState status="loading" /> : status === 'offline' ? <DataState status="offline" onRetry={refresh} /> : status === 'error' ? <DataState status="error" description={friendlyQueryError(error)} onRetry={refresh} /> : !visibleCount ? <DataState status="empty" title={results?.length ? 'No matching results' : 'No results published yet'} description={results?.length ? 'Try changing your search or filters.' : 'Published results will appear here when available.'} /> : <>
+      <p className="mb-4 text-xs font-semibold tabular-nums text-muted" aria-live="polite">{visibleCount} {visibleCount === 1 ? 'result' : 'results'} across {groups.length} {groups.length === 1 ? 'programme' : 'programmes'} · newest matching programme first</p>
+      <div className="grid gap-4">{groups.map(group => {
+        const first = group.rows[0];
+        const filtered = group.rows.length < group.total;
+        return <article key={group.key} className="rounded-panel border border-line bg-white/80 p-4 shadow-soft backdrop-blur-sm sm:p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${categoryStyle(first.competition_type).chip}`}>{first.competition_type}</p>
+              <p className="mt-2 text-xs text-muted">{first.item_category} · {first.division}</p>
+              {group.eventId ? <Link to={`/events/${encodeURIComponent(group.eventId)}`} className="mt-1 inline-block break-words text-lg font-bold text-navy hover:text-burgundy hover:underline">{first.event_name}</Link> : <h2 className="mt-1 break-words text-lg font-bold text-navy">{first.event_name || 'Programme unavailable'}</h2>}
+            </div>
+            <p className="text-xs font-semibold text-muted">{filtered ? `Filtered: ${group.rows.length} of ${group.total} published results` : `${group.rows.length} published ${group.rows.length === 1 ? 'result' : 'results'}`}</p>
+          </div>
+          {group.sharedPublishedAt && <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted"><CalendarDays size={13} aria-hidden="true" />{filtered ? 'Shown results published: ' : 'Published: '}{publishedDate(group.sharedPublishedAt)}</p>}
+          <ul className="mt-3 divide-y divide-line border-t border-line">{group.rows.map(row => <li key={row.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3 last:pb-0">
+            <span className="min-w-[3.75rem] rounded-full bg-paper px-2.5 py-1 text-center text-xs font-bold text-clay-800">{row.placement == null ? 'Place —' : `Place ${row.placement}`}</span>
+            {row.student_id && <IdentityImage src={photos[row.student_id]} name={row.student_name || 'Student'} kind="student" className="h-11 w-11" />}
+            <div className="min-w-0 flex-1">
+              <p className="break-words text-sm font-semibold text-navy">{row.student_name || row.team_name || 'Recipient not listed'}</p>
+              {row.student_name && row.team_name && <p className="mt-0.5 text-xs text-muted">Team: {row.team_name}</p>}
+              {!group.sharedPublishedAt && <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted"><CalendarDays size={13} aria-hidden="true" />{publishedDate(row.published_at)}</p>}
+            </div>
+            <div className="ml-auto flex shrink-0 items-center gap-3 text-right">
+              {row.grade && <span className="text-xs font-semibold text-muted">Grade {row.grade}</span>}
+              <span className="whitespace-nowrap text-base font-extrabold tabular-nums text-navy">{row.points == null ? '—' : formatPoints(Number(row.points))} <span className="text-xs font-medium text-muted">pts</span></span>
+            </div>
+          </li>)}</ul>
+        </article>;
+      })}</div>
+    </>}
   </div>;
 }
